@@ -1,0 +1,10 @@
+# This is the template repo. Generated test output should not be committed.
+__pycache__/
+*.py[cod]
+.venv/
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Scratch space for trying the template out
+/_sandbox/

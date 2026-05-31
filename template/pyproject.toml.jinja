@@ -1,0 +1,109 @@
+[project]
+name = "{{ project_slug }}"
+version = "0.1.0"
+description = "{{ project_description }}"
+readme = "README.md"
+requires-python = ">={{ python_version }}"
+authors = [{ name = "{{ author_name }}", email = "{{ author_email }}" }]
+{% if license != "Proprietary" -%}
+license = "{{ license }}"
+license-files = ["LICENSE"]
+{% endif -%}
+keywords = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: {{ python_version }}",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/{{ github_username }}/{{ project_slug }}"
+Repository = "https://github.com/{{ github_username }}/{{ project_slug }}"
+Issues = "https://github.com/{{ github_username }}/{{ project_slug }}/issues"
+{% if use_docs %}Documentation = "https://{{ github_username }}.github.io/{{ project_slug }}/"{% endif %}
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{{ package_name }}"]
+
+# -----------------------------------------------------------------------------
+# Dev dependencies (managed by uv: `uv sync` installs these)
+# -----------------------------------------------------------------------------
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+{%- if use_coverage %}
+    "pytest-cov>=5.0",
+{%- endif %}
+    "ruff>=0.6",
+{%- if use_mypy %}
+    "mypy>=1.11",
+{%- endif %}
+    "pre-commit>=3.8",
+{%- if use_docs %}
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.26",
+{%- endif %}
+]
+
+# -----------------------------------------------------------------------------
+# Ruff: linter + formatter
+# -----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py{{ python_version | replace('.', '') }}"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "A",        # flake8-builtins
+    "C4",       # flake8-comprehensions
+    "SIM",      # flake8-simplify
+    "PTH",      # use pathlib
+    "RUF",      # ruff-specific
+]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.ruff.format]
+docstring-code-format = true
+{% if use_mypy %}
+# -----------------------------------------------------------------------------
+# mypy: static type checking
+# -----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "{{ python_version }}"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+files = ["src", "tests"]
+{% endif %}
+# -----------------------------------------------------------------------------
+# pytest
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra{% if use_coverage %} --cov={{ package_name }} --cov-report=term-missing{% endif %}"
+{% if use_coverage %}
+[tool.coverage.run]
+branch = true
+source = ["src/{{ package_name }}"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
+{% endif %}

@@ -1,0 +1,133 @@
+# =============================================================================
+# Copier configuration for the Python project template.
+#
+# Usage:
+#   uvx copier copy gh:USER/pyproject-template my-new-project
+# or from a local checkout:
+#   uvx copier copy /path/to/pyproject-template my-new-project
+# =============================================================================
+
+_subdirectory: template
+_min_copier_version: "9.0.0"
+
+# Files copied verbatim (no Jinja rendering), regardless of extension.
+_skip_if_exists:
+  - ".env"
+
+# Keep templating clean: only *.jinja files are rendered.
+_templates_suffix: ".jinja"
+
+_message_before_copy: |
+  ────────────────────────────────────────────────────────
+   Python project template
+   Answer a few questions to scaffold your project.
+   Press Enter to accept the [default] shown for each.
+  ────────────────────────────────────────────────────────
+
+_message_after_copy: |
+
+  ✓ Project "{{ project_name }}" created.
+
+  Next steps:
+    cd {{ _copier_conf.dst_path.name }}
+    just bootstrap     # create venv, install deps, install pre-commit hooks
+    just check         # run lint + format-check{% if use_mypy %} + type-check{% endif %} + tests
+
+  Run `just` on its own to see every available command.
+
+# =============================================================================
+# Questions
+# =============================================================================
+
+project_name:
+  type: str
+  help: "Human-readable project name (e.g. \"My Awesome Library\")"
+
+project_slug:
+  type: str
+  help: "Distribution / repository name (kebab-case)"
+  default: "{{ project_name | lower | replace(' ', '-') | replace('_', '-') }}"
+
+package_name:
+  type: str
+  help: "Importable Python package name (snake_case)"
+  default: "{{ project_slug | lower | replace('-', '_') }}"
+
+project_description:
+  type: str
+  help: "One-line description of the project"
+  default: "A Python library."
+
+author_name:
+  type: str
+  help: "Author full name"
+  default: "Niraj Kumar"
+
+author_email:
+  type: str
+  help: "Author email"
+  default: "nirajkmr007@gmail.com"
+
+github_username:
+  type: str
+  help: "GitHub username or org (used for project URLs)"
+  default: "nirajkmr007"
+
+python_version:
+  type: str
+  help: "Minimum supported Python version"
+  default: "3.12"
+  choices:
+    - "3.10"
+    - "3.11"
+    - "3.12"
+    - "3.13"
+
+copyright_year:
+  type: str
+  help: "Copyright year for the LICENSE file"
+  default: "2026"
+
+license:
+  type: str
+  help: "License"
+  default: "MIT"
+  choices:
+    MIT: "MIT"
+    Apache-2.0: "Apache-2.0"
+    BSD-3-Clause: "BSD-3-Clause"
+    GPL-3.0-only: "GPL-3.0-only"
+    Proprietary (no license file): "Proprietary"
+
+# ---- Optional features -------------------------------------------------------
+
+use_mypy:
+  type: bool
+  help: "Add mypy static type checking (strict)?"
+  default: true
+
+use_coverage:
+  type: bool
+  help: "Add pytest coverage reporting (pytest-cov)?"
+  default: true
+
+use_github_actions:
+  type: bool
+  help: "Add a GitHub Actions CI workflow (lint + type-check + tests)?"
+  default: true
+
+publish_pypi:
+  type: bool
+  help: "Add a tag-triggered PyPI publish workflow (Trusted Publishing)?"
+  default: false
+  when: "{{ use_github_actions }}"
+
+use_docker:
+  type: bool
+  help: "Add a multi-stage Dockerfile?"
+  default: false
+
+use_docs:
+  type: bool
+  help: "Add a MkDocs Material documentation site?"
+  default: false

@@ -1,0 +1,44 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+## Requirements
+
+- Python {{ python_version }}+
+- [uv](https://docs.astral.sh/uv/) (package & environment manager)
+- [just](https://github.com/casey/just) (command runner)
+
+## Getting started
+
+```bash
+just bootstrap     # create the virtualenv, install deps, install git hooks
+just check         # lint + format-check{% if use_mypy %} + type-check{% endif %} + tests
+```
+
+Run `just` with no arguments to list every command.
+
+## Development
+
+```bash
+just fmt           # auto-format with ruff
+just lint          # ruff lint (with --fix)
+{% if use_mypy %}just type          # mypy
+{% endif %}just test          # pytest{% if use_coverage %} with coverage{% endif %}
+just build         # build sdist + wheel into dist/
+{% if use_docs %}just docs          # serve docs locally at http://127.0.0.1:8000
+{% endif %}```
+
+## Project layout
+
+```
+{{ project_slug }}/
+├── src/{{ package_name }}/      # package code
+├── tests/                  # pytest tests
+├── pyproject.toml          # project metadata, deps, tool config
+├── justfile                # task runner
+└── .pre-commit-config.yaml # git hooks
+```
+
+## License
+
+{% if license == "Proprietary" %}Proprietary — all rights reserved.{% else %}{{ license }} — see [LICENSE](LICENSE).{% endif %}

@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+
+# ---- builder ----------------------------------------------------------------
+FROM python:{{ python_version }}-slim AS builder
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+
+WORKDIR /app
+
+# Install dependencies first (better layer caching)
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# Install the project
+COPY . .
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+
+# ---- runtime ----------------------------------------------------------------
+FROM python:{{ python_version }}-slim AS runtime
+
+WORKDIR /app
+COPY --from=builder /app /app
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Run as non-root
+RUN useradd --create-home appuser && chown -R appuser /app
+USER appuser
+
+CMD ["python", "-c", "import {{ package_name }}; print({{ package_name }}.hello())"]
