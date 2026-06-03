@@ -65,13 +65,36 @@ GitHub username, target Python version (3.10–3.13), and license
   generated you can pull in later template improvements with
   `copier update` from inside that project.
 
+## Contributing & releasing this template
+
+`main` is protected. Install the hooks once, then always work on a feature branch:
+
+```bash
+uvx pre-commit install   # enables the no-commit-to-branch guard locally
+```
+
+Merging a feature branch into `main` triggers `.github/workflows/release.yml`,
+which tags a new version and publishes a GitHub Release. Because consumers use
+`copier update`, every release is just a git tag (`vX.Y.Z`).
+
+Choosing the version:
+
+- **Explicit** — edit the [`VERSION`](VERSION) file on your feature branch to any
+  value higher than the latest tag (or run the *Release* workflow manually and
+  type the version).
+- **Automatic** — otherwise the **minor** version is bumped by 1 from the last
+  release (e.g. `v1.4.2` → `v1.5.0`).
+
 ## Repository layout
 
 ```
 pyproject-template/
-├── copier.yml          # the questionnaire + Copier config
-├── README.md           # this file
-└── template/           # the scaffold that becomes a new project
+├── copier.yml               # the questionnaire + Copier config
+├── README.md                # this file
+├── VERSION                  # current template version (tag source)
+├── .pre-commit-config.yaml  # blocks direct commits to main
+├── .github/workflows/       # release-on-merge workflow
+└── template/                # the scaffold that becomes a new project
     ├── pyproject.toml.jinja
     ├── justfile.jinja
     ├── .pre-commit-config.yaml.jinja
