@@ -1,36 +1,32 @@
+{% raw %}# Reusable workflow: build and publish to PyPI via Trusted Publishing (OIDC).
+# Called by release.yml after a successful release. No API token required.
+# Configure the publisher at https://pypi.org/manage/account/publishing/
 name: Publish
 
-# Publishes to PyPI when a version tag (vX.Y.Z) is pushed.
-# Uses PyPI Trusted Publishing (OIDC) — no API token needed.
-# Configure the publisher at https://pypi.org/manage/account/publishing/
 on:
-  push:
-    tags: ["v*"]
+  workflow_call:
+    inputs:
+      ref:
+        description: "Git ref (tag) to build and publish"
+        required: false
+        type: string
+        default: ""
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-      - name: Build
-        run: uv build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-
   publish:
-    needs: build
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
       id-token: write
+      contents: read
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
         with:
-          name: dist
-          path: dist/
+          ref: ${{ inputs.ref }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+      - name: Build
+        run: uv build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+{% endraw %}

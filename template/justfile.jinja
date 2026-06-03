@@ -41,6 +41,13 @@ hooks:
 # Build sdist + wheel into dist/
 build:
     uv build
+{% if use_github_actions %}
+# Set the next release version on your feature branch (e.g. `just set-version 1.4.0`).
+# If you skip this, the release workflow auto-bumps the minor version on merge to main.
+set-version VERSION:
+    uv version {{ '{{VERSION}}' }}
+    @echo "Set version to {{ '{{VERSION}}' }}. Commit, push, and open a PR to main to release it."
+{% endif %}
 {% if use_docs %}
 # Serve docs locally with live reload
 docs:

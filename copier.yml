@@ -118,7 +118,7 @@ use_github_actions:
 
 publish_pypi:
   type: bool
-  help: "Add a tag-triggered PyPI publish workflow (Trusted Publishing)?"
+  help: "Publish to PyPI on each release (Trusted Publishing)?"
   default: false
   when: "{{ use_github_actions }}"
 

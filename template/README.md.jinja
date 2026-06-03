@@ -28,6 +28,30 @@ just build         # build sdist + wheel into dist/
 {% if use_docs %}just docs          # serve docs locally at http://127.0.0.1:8000
 {% endif %}```
 
+## Branching & commits
+
+`main` is protected. A pre-commit hook (`no-commit-to-branch`) blocks direct
+commits to `main`/`master` — always work on a feature branch and open a PR.
+{% if use_github_actions %}
+## Releasing
+
+Releases happen automatically when a feature branch is merged into `main`.
+The `release` workflow picks the next version, bumps `pyproject.toml` and
+`__version__`, tags it (`vX.Y.Z`), and publishes a GitHub Release{% if publish_pypi %} (then
+publishes the package to PyPI){% endif %}.
+
+Choosing the version:
+
+- **Explicit** — on your feature branch run `just set-version 1.4.0` (or trigger
+  the *Release* workflow manually and type the version). Any version higher than
+  the latest tag is used as-is.
+- **Automatic** — if you don't set one, the **minor** version is bumped by 1 from
+  the last release (e.g. `v1.4.2` → `v1.5.0`).
+
+> The workflow pushes a `chore(release)` commit and a tag back to `main`. If you
+> enable branch protection, allow the Actions bot to push (or use a PAT named
+> `GITHUB_TOKEN` with the right scope).
+{% endif %}
 ## Project layout
 
 ```

@@ -12,6 +12,9 @@ repos:
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: debug-statements
+      # Block direct commits to protected branches; commit on a feature branch instead.
+      - id: no-commit-to-branch
+        args: [--branch, main, --branch, master]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.6
